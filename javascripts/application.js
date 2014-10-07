@@ -33,6 +33,8 @@ var simulator = {
         var algorithm = $('#algorithm').val();
         if (algorithm === 'fcfs') {
             return new FirstComeFirstServeScheduler(simulator.processes);
+        } else if (algorithm === 'sjf') {
+            return new ShortestJobFirstScheduler(simulator.processes);
         }
     }
 };
@@ -76,6 +78,44 @@ function FirstComeFirstServeScheduler(processes) {
     this.dom = $('.system');
     this.t = null;
     var self = this;
+
+    this.initialize = function() {
+        self.dom.empty();
+        self.processes.forEach(function(process) {
+            var $process = templates.process(process.attributes());
+            self.dom.append($process);
+        });
+    };
+    this.simulate = function() {
+        self.t = setInterval(function() {
+            var process = self.processes[0];
+            var $process = self.dom.find('.process').first();
+            process.remaining_time--;
+            $process.find('.remaining-time span').text(process.remaining_time);
+            $process.find('.vertical-overlay').css({ 'height': (process.remaining_time / process.burst_time) * 100 + '%' });
+            $process.find('.horizontal-overlay').css({ 'width': (process.remaining_time / process.burst_time) * 100 + '%' });
+            if (!process.remaining_time) {
+                self.processes.shift();
+                $process.remove();
+            }
+        }, 1000);
+    };
+    this.initialize();
+}
+
+function ShortestJobFirstScheduler(processes) {
+    this.processes = processes.sort(burst_time_comparator);
+    this.dom = $('.system');
+    this.t = null;
+    var self = this;
+
+    function burst_time_comparator(a, b) {
+        if (a.burst_time < b.burst_time) {
+            return -1;
+        } else if (a.burst_time > b.burst_time) {
+            return 1;
+        }
+    }
 
     this.initialize = function() {
         self.dom.empty();
