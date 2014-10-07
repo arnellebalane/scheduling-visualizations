@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>CMSC 125 Lab Exercise 2</title>
+        <link rel="stylesheet" href="stylesheets/application.css">
+    </head>
+
+    <body>
+        <aside>
+            <div class="content" id="input">
+                <input type="file" name="input">
+                <span>CHOOSE FILE</span>
+            </div>
+            <div class="content">
+                <select id="algorithm">
+                    <option selected disabled>Select Scheduling Algorithm</option>
+                    <option value="fcfs">First Come First Serve</option>
+                    <option value="sjf">Shortest Job First</option>
+                    <option value="srpt">Shortest Remaining Processing Time</option>
+                    <option value="priority">Priority</option>
+                    <option value="round-robin">Round Robin Scheduling</option>
+                </select>
+                <button disabled>Simulate</button>
+            </div>
+        </aside>
+
+        <div class="system content"></div>
+
+        <script src="javascripts/jquery.js"></script>
+        <script src="javascripts/underscore.js"></script>
+        <script src="javascripts/application.js"></script>
+    </body>
+</html>
