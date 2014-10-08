@@ -239,11 +239,11 @@ main {
     left: 35%;
     right: 25px;
     bottom: 25px;
-    padding: 25px 0;
 }
 
-.timeline-item {
+.process-timeline {
     height: 20px;
+    margin-bottom: 5px;
     position: relative;
 }
 
@@ -266,11 +266,21 @@ main {
 }
 
 .timeline-plot {
-    display: inline-block;
-    width: 200px;
+    float: left;
+    width: 0;
     height: 100%;
 }
 
+.timeline-plot:last-child {
+    margin-right: -5px;
+}
+
 .timeline-plot.active {
-    background-color: #0097a7;
+    background-color: #e00032;
+}
+
+.timeline-plot.idle {
+    height: 4px;
+    background-color: #ff2d6f;
+    margin-top: 8px;
 }
