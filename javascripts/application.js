@@ -26,6 +26,11 @@ var simulator = {
         reader.readAsText(e.target.files[0]);
     },
     simulate: function() {
+        $(document).on('clear', dom.clear_system);
+        $(document).on('queue', dom.queue_process);
+        $(document).on('update', dom.update_process);
+        $(document).on('finish', dom.finish_process);
+
         simulator.processor = simulator.get_processor();
         simulator.processor.simulate();
     },
@@ -40,7 +45,7 @@ var simulator = {
 };
 
 var templates = {
-    process: _.template('<div class="process">'
+    process: _.template('<div class="process" data-id="<%= id %>">'
                             + '<div class="overlay vertical-overlay"></div>'
                             + '<div class="overlay horizontal-overlay"></div>'
                             + '<div class="process-content">'
@@ -51,6 +56,28 @@ var templates = {
                                 + '<p class="priority"><label>P</label><span><%= priority %></span></p>'
                             + '</div>'
                         + '</div>')
+};
+
+var dom = {
+    system: $('.system'),
+    clear_system: function() {
+        dom.system.empty();
+    },
+    queue_process: function(e) {
+        var $process = templates.process(e.message.attributes());
+        dom.system.append($process);
+    },
+    update_process: function(e) {
+        var process = e.message;
+        var $process = dom.system.find('.process[data-id="' + process.id + '"]');
+        $process.find('.remaining-time span').text(process.remaining_time);
+        $process.find('.vertical-overlay').css({ 'height': (process.remaining_time / process.burst_time) * 100 + '%' });
+        $process.find('.horizontal-overlay').css({ 'width': (process.remaining_time / process.burst_time) * 100 + '%' });
+    },
+    finish_process: function(e) {
+        var $process = dom.system.find('.process[data-id="' + e.message.id + '"]');
+        $process.remove();
+    }
 };
 
 
@@ -75,28 +102,23 @@ function Process(id, arrival, burst_time, priority) {
 
 function FirstComeFirstServeScheduler(processes) {
     this.processes = processes;
-    this.dom = $('.system');
     this.t = null;
     var self = this;
 
     this.initialize = function() {
-        self.dom.empty();
+        dispatch('clear');
         self.processes.forEach(function(process) {
-            var $process = templates.process(process.attributes());
-            self.dom.append($process);
+            dispatch('queue', process);
         });
     };
     this.simulate = function() {
         self.t = setInterval(function() {
             var process = self.processes[0];
-            var $process = self.dom.find('.process').first();
             process.remaining_time--;
-            $process.find('.remaining-time span').text(process.remaining_time);
-            $process.find('.vertical-overlay').css({ 'height': (process.remaining_time / process.burst_time) * 100 + '%' });
-            $process.find('.horizontal-overlay').css({ 'width': (process.remaining_time / process.burst_time) * 100 + '%' });
+            dispatch('update', process);
             if (!process.remaining_time) {
                 self.processes.shift();
-                $process.remove();
+                dispatch('finish', process);
             }
         }, 1000);
     };
@@ -118,25 +140,27 @@ function ShortestJobFirstScheduler(processes) {
     }
 
     this.initialize = function() {
-        self.dom.empty();
+        dispatch('clear');
         self.processes.forEach(function(process) {
-            var $process = templates.process(process.attributes());
-            self.dom.append($process);
+            dispatch('queue', process);
         });
     };
     this.simulate = function() {
         self.t = setInterval(function() {
             var process = self.processes[0];
-            var $process = self.dom.find('.process').first();
             process.remaining_time--;
-            $process.find('.remaining-time span').text(process.remaining_time);
-            $process.find('.vertical-overlay').css({ 'height': (process.remaining_time / process.burst_time) * 100 + '%' });
-            $process.find('.horizontal-overlay').css({ 'width': (process.remaining_time / process.burst_time) * 100 + '%' });
+            dispatch('update', process);
             if (!process.remaining_time) {
                 self.processes.shift();
-                $process.remove();
+                dispatch('finish', process);
             }
         }, 1000);
     };
     this.initialize();
+}
+
+
+
+function dispatch(type, message) {
+    $(document).trigger({ type: type, message: message });
 }
