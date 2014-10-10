@@ -44,6 +44,8 @@ var simulator = {
             return new ShortestJobFirstScheduler(simulator.processes);
         } else if (algorithm === 'srpt') {
             return new ShortestRemainingProcessingTimeScheduler(simulator.processes);
+        } else if (algorithm === 'priority') {
+            return new PriorityScheduler(simulator.processes);
         }
     }
 };
@@ -258,6 +260,55 @@ function ShortestRemainingProcessingTimeScheduler(processes) {
     this.initialize();
 }
 
+function PriorityScheduler(processes) {
+    this.processes = [];
+    this.queue = processes;
+    this.elapsed_time = 0;
+    this.t = null;
+    var self = this;
+
+    this.initialize = function() {
+        self.queue = self.queue.sort(arrival_time_comparator);
+        while (!self.queue[0].arrival_time) {
+            var process = self.queue.shift();
+            self.processes.push(process);
+            dispatch('queue graph', process);
+        }
+    };
+    this.simulate = function() {
+        self.t = setInterval(function() {
+            self.elapsed_time++;
+            var process = self.processes[0];
+            if (process) {
+                process.remaining_time--;
+                dispatch('update ticktock', process);
+                if (!process.remaining_time) {
+                    self.processes.shift();
+                    dispatch('finish', process);
+                }
+                while (self.queue.length && self.queue[0].arrival_time === self.elapsed_time) {
+                    var current = self.processes[0];
+                    var incoming = self.queue.shift();
+                    self.processes.push(incoming);
+                    dispatch('queue graph', incoming);
+                    self.processes = self.processes.slice(1).sort(priority_comparator);
+                    if (current.remaining_time) {
+                        self.processes.unshift(current);
+                    }
+                    dispatch('requeue', self.processes);
+                }
+            }
+            if (!self.processes.length && !self.queue.length) {
+                self.stop();
+            }
+        }, simulator.frame_speed);
+    };
+    this.stop = function() {
+        clearInterval(self.t);
+    };
+    this.initialize();
+}
+
 
 
 // EXTRA STUFF
@@ -319,6 +370,15 @@ function remaining_time_comparator(a, b) {
     if (a.remaining_time < b.remaining_time) {
         return -1;
     } else if (a.remaining_time > b.remaining_time) {
+        return 1;
+    }
+    return arrival_time_comparator(a, b);
+}
+
+function priority_comparator(a, b) {
+    if (a.priority < b.priority) {
+        return -1;
+    } else if (a.priority > b.priority) {
         return 1;
     }
     return arrival_time_comparator(a, b);
