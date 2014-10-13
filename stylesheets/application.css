@@ -42,28 +42,6 @@ aside.idle .active {
     display: none;
 }
 
-#clock {
-    border-bottom: 3px solid #00796b;
-}
-
-.active h1 {
-    font: normal 2rem "Ubuntu";
-    color: #222222;
-}
-
-.active span {
-    display: inline-block;
-    background-color: #ff9800;
-    border-radius: 2px;
-    font: bold 1.6rem/34px "Open Sans";
-    color: #333333;
-    letter-spacing: -1px;
-    text-align: center;
-    padding: 0 12px;
-    margin-left: 5px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-}
-
 #input {
     position: relative;
     border-bottom: 3px solid #00796b;
@@ -140,6 +118,70 @@ button:focus {
 
 button:disabled {
     background-color: #607d8b;
+}
+
+#clock {
+    border-bottom: 3px solid #00796b;
+}
+
+.active h1 {
+    font: normal 2rem "Ubuntu";
+    color: #222222;
+}
+
+.active h1 span {
+    display: inline-block;
+    background-color: #ff9800;
+    border-radius: 2px;
+    font: bold 1.6rem/34px "Open Sans";
+    color: #333333;
+    letter-spacing: -1px;
+    text-align: center;
+    padding: 0 12px;
+    margin-left: 5px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.processes {
+    height: 485px;
+    padding: 0 15px;
+    overflow: auto;
+}
+
+.process-report {
+    background-color: #00695c;
+    border-radius: 2px;
+    padding: 8px 8px 8px 39px;
+    margin-bottom: 5px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+    position: relative;
+}
+
+.process-report:last-of-type {
+    margin-bottom: 2px;
+}
+
+.process-report h4 {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    width: 25px;
+    font: bold 1.2rem "Ubuntu";
+    color: #ffffff;
+    text-align: center;
+    padding: 2px 0;
+    background-color: #ff5722;
+    border-radius: 2px;
+}
+
+.process-report p {
+    font: normal 1.4rem/1 "Ubuntu";
+    color: #eeeeee;
+}
+
+.process-report span {
+    float: right;
+    font-weight: bold;
 }
 
 main {
@@ -309,4 +351,15 @@ main {
     height: 4px;
     background-color: #ff5177;
     margin-top: 8px;
+}
+
+
+
+/** PLUGIN OVERRIDES **/
+.mCSB_scrollTools {
+    width: 6px !important;
+}
+
+.mCSB_container {
+    margin-right: 10px !important;
 }

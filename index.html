@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <title>CMSC 125 Lab Exercise 2</title>
         <link rel="stylesheet" href="stylesheets/application.css">
+        <link rel="stylesheet" href="stylesheets/jquery.mCustomScrollbar.css">
     </head>
 
     <body>
@@ -29,8 +30,9 @@
                 <div class="content" id="clock">
                     <h1>elapsed time: <span class="elapsed-time">0</span></h1>
                 </div>
-                <div class="content hidden" id="waiting-time">
-                    <h1>avg. waiting time: <span class="avg-waiting-time">0</span></h1>
+                <div class="hidden" id="report">
+                    <h1 class="content">avg. waiting time: <span class="avg-waiting-time">0</span></h1>
+                    <div class="processes"></div>
                 </div>
             </div>
         </aside>
@@ -40,6 +42,7 @@
 
         <script src="javascripts/jquery.js"></script>
         <script src="javascripts/underscore.js"></script>
+        <script src="javascripts/jquery.mCustomScrollbar.concat.min.js"></script>
         <script src="javascripts/application.js"></script>
     </body>
 </html>

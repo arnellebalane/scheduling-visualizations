@@ -71,7 +71,28 @@ var dom = {
         $('aside').removeClass('idle').addClass('live');
     },
     stop_simulation: function() {
-        $('.avg-waiting-time').text(simulator.elapsed_time / $('.process-timeline').length).closest('.content').removeClass('hidden');
+        var total_waiting_time = 0;
+        var $processes = $('.processes');
+        var i = 1;
+        $('.process-timeline').each(function() {
+            var id = $(this).closest('.process-timeline').data('id');
+            var waiting_time = 0;
+            $(this).find('.timeline-plot.idle').each(function() {
+                var start = parseInt($(this).data('start'));
+                var end = parseInt($(this).data('end')) || start;
+                waiting_time += end - start;
+            });
+            var $report = templates.process_report({ id: id, waiting_time: waiting_time });
+            $processes.append($report);
+            console.groupEnd();
+            total_waiting_time += waiting_time;
+        });
+        $('.avg-waiting-time').text(total_waiting_time / $('.process-timeline').length);
+        $('#report').removeClass('hidden');
+        $processes.mCustomScrollbar({
+            scrollInertia: 0,
+            theme: 'dark-thick'
+        });
     },
     clear_system: function() {
         dom.system.empty();
@@ -102,6 +123,7 @@ var dom = {
         $process.find('.vertical-overlay').css({ 'height': (process.remaining_time / process.burst_time) * 100 + '%' });
         $process.find('.horizontal-overlay').css({ 'width': (process.remaining_time / process.burst_time) * 100 + '%' });
         if (!$timeline.find('.timeline-plot').last().hasClass('active')) {
+            $timeline.find('.timeline-plot:last-child').attr('data-end', simulator.elapsed_time);
             var $timeplot = $(templates.active_timeplot());
             $timeplot.attr('data-start', simulator.elapsed_time);
             $timeline.append($timeplot);
@@ -109,10 +131,11 @@ var dom = {
     },
     finish_process: function(e) {
         dom.system.find('.process[data-id="' + e.message.id + '"]').remove();
-        dom.chart.find('.process-timeline[data-id="' + e.message.id + '"]').addClass('done');;
+        dom.chart.find('.process-timeline[data-id="' + e.message.id + '"]').addClass('done').find('.timeline-plot:last-child').attr('data-end', simulator.elapsed_time);
     },
     idle_process: function(e) {
         $process = dom.chart.find('.process-timeline[data-id="' + e.message.id + '"]');
+        $process.find('.timeline-plot:last-child').attr('data-end', simulator.elapsed_time);
         $timeplot = $(templates.idle_timeplot());
         $timeplot.attr('data-start', simulator.elapsed_time);
         $process.find('.timeline').append($timeplot);
@@ -401,6 +424,10 @@ var templates = {
                                         + '<label><%= id %></label>'
                                         + '<div class="timeline"></div>'
                                     + '</div>'),
+    process_report: _.template('<div class="process-report">'
+                                    +'<h4><%= id %></h4>'
+                                    + '<p><label>Waiting Time</label><span><%= waiting_time %></span></p>'
+                                + '</div>'),
     default_timeplot: _.template('<div class="timeline-plot"></div>'),
     active_timeplot: _.template('<div class="timeline-plot active"></div>'),
     idle_timeplot: _.template('<div class="timeline-plot idle"></div>')
