@@ -24,6 +24,10 @@ body {
     display: none;
 }
 
+.content {
+    padding: 25px;
+}
+
 aside {
     position: absolute;
     top: 0;
@@ -33,8 +37,31 @@ aside {
     background-color: #009688;
 }
 
-.content {
-    padding: 25px;
+aside.live .inactive,
+aside.idle .active {
+    display: none;
+}
+
+#clock {
+    border-bottom: 3px solid #00796b;
+}
+
+.active h1 {
+    font: normal 2rem "Ubuntu";
+    color: #222222;
+}
+
+.active span {
+    display: inline-block;
+    background-color: #ff9800;
+    border-radius: 2px;
+    font: bold 1.6rem/34px "Open Sans";
+    color: #333333;
+    letter-spacing: -1px;
+    text-align: center;
+    padding: 0 12px;
+    margin-left: 5px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 #input {
@@ -54,7 +81,6 @@ aside {
 }
 
 #input span {
-    content: "Choose File";
     position: absolute;
     top: 25px;
     left: 25px;

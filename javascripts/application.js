@@ -11,7 +11,7 @@ var simulator = {
     processor: null,
     total_time: 0,
     elapsed_time: 0,
-    frame_speed: 100,
+    frame_speed: 10,
     parse: function(e) {
         var reader = new FileReader();
         reader.onload = function(data) {
@@ -35,6 +35,7 @@ var simulator = {
         simulator.elapsed_time = 0;
         simulator.processor = simulator.get_processor();
         simulator.processor.simulate();
+        dom.start_simulation();
     },
     get_processor: function() {
         var algorithm = $('#algorithm').val();
@@ -46,6 +47,8 @@ var simulator = {
             return new ShortestRemainingProcessingTimeScheduler(simulator.processes);
         } else if (algorithm === 'priority') {
             return new PriorityScheduler(simulator.processes);
+        } else if (algorithm === 'round-robin') {
+            return new RoundRobinScheduler(simulator.processes, 4);
         }
     }
 };
@@ -62,6 +65,13 @@ var dom = {
         $(document).on('idle', dom.idle_process);
         $(document).on('requeue', dom.requeue_processes);
         $(document).on('ticktock', dom.ticktock);
+        $(document).on('stop', dom.stop_simulation);
+    },
+    start_simulation: function() {
+        $('aside').removeClass('idle').addClass('live');
+    },
+    stop_simulation: function() {
+        $('.avg-waiting-time').text(simulator.elapsed_time / $('.process-timeline').length).closest('.content').removeClass('hidden');
     },
     clear_system: function() {
         dom.system.empty();
@@ -120,6 +130,7 @@ var dom = {
             var start = parseInt($(this).attr('data-start'));
             $(this).css('width', (simulator.elapsed_time - start) / simulator.total_time * 100 + '%');
         });
+        $('.elapsed-time').text(simulator.elapsed_time);
     }
 };
 
@@ -172,6 +183,7 @@ function FirstComeFirstServeScheduler(processes) {
         }, simulator.frame_speed);
     };
     this.stop = function() {
+        dispatch('stop');
         clearInterval(self.t);
     };
     this.initialize();
@@ -207,6 +219,7 @@ function ShortestJobFirstScheduler(processes) {
         }, simulator.frame_speed);
     };
     this.stop = function() {
+        dispatch('stop');
         clearInterval(self.t);
     };
     this.initialize();
@@ -255,6 +268,7 @@ function ShortestRemainingProcessingTimeScheduler(processes) {
         }, simulator.frame_speed);
     };
     this.stop = function() {
+        dispatch('stop');
         clearInterval(self.t);
     };
     this.initialize();
@@ -304,6 +318,65 @@ function PriorityScheduler(processes) {
         }, simulator.frame_speed);
     };
     this.stop = function() {
+        dispatch('stop');
+        clearInterval(self.t);
+    };
+    this.initialize();
+}
+
+function RoundRobinScheduler(processes, quantum) {
+    this.processes = [];
+    this.queue = processes;
+    this.elapsed_time = 0;
+    this.quantum_size = quantum;
+    this.quantum_time = quantum;
+    this.t = null;
+    var self = this;
+
+    this.initialize = function() {
+        self.queue = this.queue.sort(arrival_time_comparator);
+        while (!this.queue[0].arrival_time) {
+            var process = self.queue.shift();
+            self.processes.push(process);
+            dispatch('queue graph', process);
+        }
+    };
+    this.simulate = function() {
+        self.t = setInterval(function() {
+            self.elapsed_time++;
+            var process = self.processes[0];
+            self.quantum_time--;
+            console.log(self.quantum_time);
+            if (process) {
+                process.remaining_time--;
+                dispatch('update ticktock', process);
+                if (!process.remaining_time) {
+                    self.processes.shift();
+                    dispatch('finish', process);
+                }
+                if (!self.quantum_time) {
+                    self.quantum_time = self.quantum_size;
+                    if (process.remaining_time) {
+                        self.processes.shift();
+                        self.processes.push(process);
+                        dispatch('idle', process);
+                        dispatch('requeue', self.processes);
+                    }
+                }
+                while (self.queue.length && self.queue[0].arrival_time === self.elapsed_time) {
+                    var incoming = self.queue.shift();
+                    self.processes.push(incoming);
+                    dispatch('queue graph', incoming);
+                    dispatch('requeue', self.processes);
+                }
+            }
+            if (!self.processes.length && !self.queue.length) {
+                self.stop();
+            }
+        }, simulator.frame_speed);
+    };
+    this.stop = function() {
+        dispatch('stop');
         clearInterval(self.t);
     };
     this.initialize();

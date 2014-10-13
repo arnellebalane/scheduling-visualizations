@@ -7,21 +7,31 @@
     </head>
 
     <body>
-        <aside>
-            <div class="content" id="input">
-                <input type="file" name="input">
-                <span>CHOOSE FILE</span>
+        <aside class="idle">
+            <div class="inactive">
+                <div class="content" id="input">
+                    <input type="file" name="input">
+                    <span>CHOOSE FILE</span>
+                </div>
+                <div class="content">
+                    <select id="algorithm">
+                        <option selected disabled>Select Scheduling Algorithm</option>
+                        <option value="fcfs">First Come First Serve</option>
+                        <option value="sjf">Shortest Job First</option>
+                        <option value="srpt">Shortest Remaining Processing Time</option>
+                        <option value="priority">Priority</option>
+                        <option value="round-robin">Round Robin Scheduling</option>
+                    </select>
+                    <button disabled>Simulate</button>
+                </div>
             </div>
-            <div class="content">
-                <select id="algorithm">
-                    <option selected disabled>Select Scheduling Algorithm</option>
-                    <option value="fcfs">First Come First Serve</option>
-                    <option value="sjf">Shortest Job First</option>
-                    <option value="srpt">Shortest Remaining Processing Time</option>
-                    <option value="priority">Priority</option>
-                    <option value="round-robin">Round Robin Scheduling</option>
-                </select>
-                <button disabled>Simulate</button>
+            <div class="active">
+                <div class="content" id="clock">
+                    <h1>elapsed time: <span class="elapsed-time">0</span></h1>
+                </div>
+                <div class="content hidden" id="waiting-time">
+                    <h1>avg. waiting time: <span class="avg-waiting-time">0</span></h1>
+                </div>
             </div>
         </aside>
 
