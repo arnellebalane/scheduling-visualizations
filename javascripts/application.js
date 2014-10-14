@@ -48,7 +48,8 @@ var simulator = {
         } else if (algorithm === 'priority') {
             return new PriorityScheduler(simulator.processes);
         } else if (algorithm === 'round-robin') {
-            return new RoundRobinScheduler(simulator.processes, 4);
+            var quantum = prompt('Enter the value for the quantum:');
+            return new RoundRobinScheduler(simulator.processes, parseInt(quantum));
         }
     }
 };
@@ -187,6 +188,7 @@ function FirstComeFirstServeScheduler(processes) {
         dispatch('clear');
         self.elapsed_time = 0;
         self.processes.forEach(function(process) {
+            process.arrival_time = 0;
             dispatch('queue graph', process);
         });
     };
@@ -223,6 +225,7 @@ function ShortestJobFirstScheduler(processes) {
         dispatch('clear');
         self.elapsed_time = 0;
         self.processes.forEach(function(process) {
+            process.arrival_time = 0;
             dispatch('queue graph', process);
         });
     };
@@ -306,9 +309,10 @@ function PriorityScheduler(processes) {
 
     this.initialize = function() {
         self.queue = self.queue.sort(arrival_time_comparator);
-        while (!self.queue[0].arrival_time) {
+        while (self.queue[0] && !self.queue[0].arrival_time) {
             var process = self.queue.shift();
             self.processes.push(process);
+            self.processes = self.processes.sort(priority_comparator);
             dispatch('queue graph', process);
         }
     };
@@ -375,6 +379,7 @@ function RoundRobinScheduler(processes, quantum) {
                 dispatch('update ticktock', process);
                 if (!process.remaining_time) {
                     self.processes.shift();
+                    self.quantum_time = self.quantum_size;
                     dispatch('finish', process);
                 }
                 if (!self.quantum_time) {
