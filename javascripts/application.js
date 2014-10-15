@@ -362,7 +362,7 @@ function RoundRobinScheduler(processes, quantum) {
 
     this.initialize = function() {
         self.queue = this.queue.sort(arrival_time_comparator);
-        while (!this.queue[0].arrival_time) {
+        while (self.queue[0] && !this.queue[0].arrival_time) {
             var process = self.queue.shift();
             self.processes.push(process);
             dispatch('queue graph', process);
